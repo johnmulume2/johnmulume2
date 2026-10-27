@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lecture à voix haute · Anglais</title>
+<style>
+:root{--bg:#f4f7f7;--card:#fff;--ink:#13222b;--mut:#5b6b73;--line:#d5dee1;--acc:#0f766e;--ok:#c9eed8;--near:#ffe0b3;--bad:#ffc9c9;--miss:#fff3a6;--k:#bfe3ff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1a20;--card:#16262e;--ink:#e8f0f2;--mut:#93a4ac;--line:#2a3d46;--acc:#3cc4b4;--ok:#1d5a3b;--near:#6b4a14;--bad:#6e2323;--miss:#625711;--k:#1f4d73}}
+:root[data-theme="dark"]{--bg:#0e1a20;--card:#16262e;--ink:#e8f0f2;--mut:#93a4ac;--line:#2a3d46;--acc:#3cc4b4;--ok:#1d5a3b;--near:#6b4a14;--bad:#6e2323;--miss:#625711;--k:#1f4d73}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:14px;max-width:760px;margin:auto}
+h1{font:700 1.35rem/1.2 Georgia,"Times New Roman",serif;margin:4px 0 2px}h2{font-size:1rem;margin:0 0 8px}
+.sub{color:var(--mut);font-size:.9rem;margin:0 0 14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+select,button,textarea{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+button{cursor:pointer;min-height:44px}button.p{background:var(--acc);color:#fff;border-color:var(--acc);font-weight:600}
+button.rec{background:#b3261e;color:#fff;border-color:#b3261e;font-weight:600}
+button:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+textarea{width:100%;min-height:90px}
+#txt{font:1.3rem/2.1 Georgia,"Times New Roman",serif}
+.w{border-radius:4px;padding:2px 1px;cursor:pointer}.w.k{background:var(--k)}
+.w.ok{background:var(--ok)}.w.near{background:var(--near)}.w.bad{background:var(--bad)}.w.miss{background:var(--miss);text-decoration:underline dotted}
+.sc{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0}
+.sc div{border:1px solid var(--line);border-radius:8px;padding:8px;text-align:center}.sc b{display:block;font:700 1.4rem Georgia,serif}.sc span{font-size:.75rem;color:var(--mut)}
+.leg{font-size:.8rem;color:var(--mut)}.leg i{font-style:normal;padding:1px 6px;border-radius:4px;margin-right:4px}
+#live{min-height:1.5em;color:var(--mut);font-style:italic}
+.msg{font-size:.88rem;color:var(--mut)}.warn{color:#b3261e}
+table{width:100%;border-collapse:collapse;font-size:.88rem}td,th{border-bottom:1px solid var(--line);padding:6px 4px;text-align:left}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);max-width:min(92vw,460px)}
+dialog::backdrop{background:rgba(0,0,0,.45)}.ipa{font:1.4rem Georgia,serif;color:var(--acc)}
+details summary{cursor:pointer;color:var(--mut);font-size:.9rem}
+</style></head><body>
+<h1>Lecture à voix haute · anglais</h1>
+<p class="sub">Écoutez le modèle, lisez, puis comparez mot par mot. Pensé pour le téléphone.</p>
+
+<div class="card">
+ <div class="row">
+  <select id="lv" aria-label="Niveau"><option value="">Tous niveaux</option><option>Débutant</option><option>Intermédiaire</option><option>Avancé</option></select>
+  <select id="dom" aria-label="Domaine"><option value="">Tous domaines</option><option>Médical</option><option>Tech</option><option>Business</option><option>Général</option></select>
+  <select id="pick" aria-label="Texte"></select>
+ </div>
+ <div class="row" style="margin-top:8px">
+  <select id="acc" aria-label="Accent"><option value="en-US">Accent US</option><option value="en-GB">Accent UK</option></select>
+  <select id="rate" aria-label="Vitesse"><option value="0.75">0,75×</option><option value="1" selected>1,0×</option><option value="1.25">1,25×</option></select>
+  <button id="custom">Mon texte</button>
+ </div>
+ <div id="cbox" hidden style="margin-top:8px"><textarea id="ctxt" placeholder="Collez un paragraphe en anglais (article médical, publication…)"></textarea><button class="p" id="cok">Utiliser ce texte</button></div>
+</div>
+
+<div class="card">
+ <div id="txt" aria-live="polite"></div>
+ <div class="row" style="margin-top:10px">
+  <button id="hear">▶ Écouter</button>
+  <button id="shadow">Shadowing</button>
+  <button id="rb" class="p">● Lire à voix haute</button>
+ </div>
+ <p id="live"></p><p id="msg" class="msg"></p>
+ <details><summary>Le micro ne marche pas ? Saisir ce que j’ai dit</summary>
+  <textarea id="man" placeholder="Tapez ou dictez avec le clavier de votre téléphone ce que vous avez lu"></textarea><button id="mok">Analyser</button></details>
+</div>
+
+<div class="card" id="res" hidden>
+ <h2>Résultat</h2>
+ <div class="sc"><div><b id="s1">–</b><span>Précision</span></div><div><b id="s2">–</b><span>Mots/min</span></div><div><b id="s3">–</b><span>Erreurs</span></div><div><b id="s4">–</b><span>Ajouts</span></div></div>
+ <p class="leg"><i style="background:var(--ok)">juste</i><i style="background:var(--near)">proche</i><i style="background:var(--bad)">autre mot</i><i style="background:var(--miss)">omis</i> Touchez un mot pour son IPA et un conseil.</p>
+ <p class="msg" id="note"></p>
+</div>
+
+<div class="card"><h2>Progression</h2><p class="msg" id="top"></p><div style="overflow-x:auto"><table><thead><tr><th>Date</th><th>Texte</th><th>Préc.</th><th>MPM</th><th>Err.</th></tr></thead><tbody id="hist"></tbody></table></div><button id="clr" style="margin-top:8px">Effacer l’historique</button></div>
+
+<dialog id="dlg"><h2 id="dw"></h2><div class="ipa" id="di"></div><p id="dh" class="msg"></p><div id="dt"></div>
+ <div class="row"><button class="p" id="d1">▶ Normal</button><button id="d2">▶ Lent</button><button id="dx">Fermer</button></div></dialog>
+
+<script>
+const $=s=>document.querySelector(s);
+const TEXTS=[
+{t:"Le cœur",lv:"Débutant",dom:"Médical",x:"The heart pumps blood through the body. A healthy heart beats about seventy times each minute at rest."},
+{t:"Hypertension",lv:"Intermédiaire",dom:"Médical",x:"Hypertension, commonly known as high blood pressure, occurs when the force of blood against the artery walls is consistently too high. Many patients experience no symptoms, so regular screening is essential."},
+{t:"Diabète",lv:"Avancé",dom:"Médical",x:"Diabetes is a chronic condition characterized by elevated glucose levels. Physicians recommend that patients monitor their diet, exercise regularly, and adhere to the prescribed pharmaceutical therapy to prevent cardiovascular complications."},
+{t:"Le téléphone",lv:"Débutant",dom:"Tech",x:"My phone has a small screen and a long battery. I use it every day to read, write, and talk with my friends."},
+{t:"Algorithmes",lv:"Avancé",dom:"Tech",x:"An algorithm is a finite sequence of instructions. Through careful architecture, developers ensure that the software remains thorough, reliable, and scalable."},
+{t:"Réunion",lv:"Intermédiaire",dom:"Business",x:"Thank you for joining the meeting. Today we will review the quarterly results and discuss the strategy for the next three months."},
+{t:"Le matin",lv:"Débutant",dom:"Général",x:"Every morning, I drink a cup of tea and walk to work. The weather is often cold, but I think the fresh air is healthy."}];
+const IPA={think:"θɪŋk",three:"θriː",through:"θruː",thorough:"ˈθʌroʊ",though:"ðoʊ",the:"ðə",healthy:"ˈhɛlθi",weather:"ˈwɛðər",hypertension:"ˌhaɪpərˈtɛnʃən",symptoms:"ˈsɪmptəmz",artery:"ˈɑːrtəri",diabetes:"ˌdaɪəˈbiːtiːz",chronic:"ˈkrɒnɪk",characterized:"ˈkærəktəraɪzd",elevated:"ˈɛlɪveɪtɪd",glucose:"ˈɡluːkoʊs",physicians:"fɪˈzɪʃənz",pharmaceutical:"ˌfɑːrməˈsuːtɪkəl",cardiovascular:"ˌkɑːrdioʊˈvæskjələr",complications:"ˌkɒmplɪˈkeɪʃənz",adhere:"ædˈhɪr",algorithm:"ˈælɡərɪðəm",finite:"ˈfaɪnaɪt",architecture:"ˈɑːrkɪˌtɛktʃər",developers:"dɪˈvɛləpərz",software:"ˈsɒftwɛr",reliable:"rɪˈlaɪəbəl",scalable:"ˈskeɪləbəl",quarterly:"ˈkwɔːrtərli",strategy:"ˈstrætədʒi",screening:"ˈskriːnɪŋ",essential:"ɪˈsɛnʃəl",patients:"ˈpeɪʃənts",pressure:"ˈprɛʃər",battery:"ˈbætəri",often:"ˈɒfən",morning:"ˈmɔːrnɪŋ",heart:"hɑːrt"};
+const RULES=[[/th/,"th : pointe de la langue entre les dents. /θ/ sans voix (think), /ð/ avec voix (the). Jamais /t/, /s/ ou /z/."],[/^h/,"h initial : un souffle audible, il n’est pas muet comme en français."],[/tion$|sion$|tions$|sions$/,"-tion/-sion se lit /ʃən/ ; l’accent tombe sur la syllabe juste avant."],[/ed$/,"-ed : /t/, /d/, ou /ɪd/ seulement après t ou d. Ne pas ajouter de syllabe sinon."],[/r/,"r anglais : langue en arrière sans toucher le palais, lèvres légèrement arrondies. Pas de r du fond de la gorge."],[/ough/,"-ough change selon le mot (through, though, tough, cough) : écoutez le modèle."],[/ph/,"ph se lit /f/."],[/^pn|^ps/,"Initiale pn-/ps- : le p est muet."],[/ch/,"ch : /tʃ/ (teach) ou /k/ dans les mots d’origine grecque (chronic)."],[/w/,"w : lèvres arrondies, comme « ou » + voyelle. Pas de /v/."],[/gh/,"gh est souvent muet (thorough, night)."]];
+const sylls=w=>(w.toLowerCase().match(/[aeiouy]+/g)||[]).length;
+let cur=TEXTS[1].x,curT=TEXTS[1].t,words=[],spans=[],rec=null,on=false,fin="",t0=0,SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const norm=w=>w.toLowerCase().replace(/[’]/g,"'").replace(/[^a-z0-9']/g,"");
+function lev(a,b){const d=Array.from({length:a.length+1},(_,i)=>[i]);for(let j=1;j<=b.length;j++)d[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1));return d[a.length][b.length]}
+const sim=(a,b)=>a===b?1:1-lev(a,b)/Math.max(a.length,b.length);
+function render(){const el=$("#txt");el.textContent="";words=[];spans=[];let re=/\S+/g,m,last=0;while((m=re.exec(cur))){const s=document.createElement("span");s.className="w";s.textContent=m[0];s.dataset.i=words.length;words.push({raw:m[0],n:norm(m[0]),at:m.index});spans.push(s);el.append(s," ")}$("#res").hidden=true;$("#live").textContent="";$("#msg").textContent=""}
+function fillPick(){const lv=$("#lv").value,dm=$("#dom").value,p=$("#pick");p.textContent="";TEXTS.filter(t=>(!lv||t.lv===lv)&&(!dm||t.dom===dm)).forEach(t=>{const o=document.createElement("option");o.value=TEXTS.indexOf(t);o.textContent=t.t+" ("+t.lv+")";p.append(o)});if(p.options.length){p.value=p.options[0].value;load()}}
+function load(){const t=TEXTS[+$("#pick").value];if(!t)return;cur=t.x;curT=t.t;render()}
+/* Audio */
+function voice(){const l=$("#acc").value,v=speechSynthesis.getVoices();return v.find(x=>x.lang.replace("_","-")===l)||v.find(x=>x.lang.startsWith("en"))}
+function say(text,rate,onb,end){if(!("speechSynthesis" in window)){$("#msg").textContent="Synthèse vocale indisponible sur ce navigateur.";return}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang=$("#acc").value;const v=voice();if(v)u.voice=v;u.rate=rate;if(onb)u.onboundary=onb;u.onend=u.onerror=()=>{end&&end()};speechSynthesis.speak(u)}
+function clearK(){spans.forEach(s=>s.classList.remove("k"))}
+function hear(karaoke){clearK();say(cur,+$("#rate").value,karaoke?e=>{if(e.name&&e.name!=="word")return;let i=words.findIndex((w,k)=>e.charIndex>=w.at&&(k===words.length-1||e.charIndex<words[k+1].at));clearK();if(i>=0)spans[i].classList.add("k")}:null,clearK)}
+/* Alignement */
+function align(T,S){const n=T.length,m=S.length,G=.8,d=Array.from({length:n+1},()=>Array(m+1).fill(0));for(let i=1;i<=n;i++)d[i][0]=i*G;for(let j=1;j<=m;j++)d[0][j]=j*G;for(let i=1;i<=n;i++)for(let j=1;j<=m;j++)d[i][j]=Math.min(d[i-1][j-1]+(1-sim(T[i-1],S[j-1])),d[i-1][j]+G,d[i][j-1]+G);const out=Array(n),ins=[];let i=n,j=m;while(i>0||j>0){if(i>0&&j>0&&Math.abs(d[i][j]-(d[i-1][j-1]+(1-sim(T[i-1],S[j-1]))))<1e-9){out[i-1]={h:S[j-1],s:sim(T[i-1],S[j-1])};i--;j--}else if(i>0&&Math.abs(d[i][j]-(d[i-1][j]+G))<1e-9){out[i-1]=null;i--}else{ins.push(S[j-1]);j--}}return{out,ins}}
+function analyze(spoken,secs){const S=spoken.split(/\s+/).map(norm).filter(Boolean);if(!S.length){$("#msg").textContent="Aucune parole détectée. Réessayez plus près du micro.";return}
+const T=words.map(w=>w.n),{out,ins}=align(T,S);let ok=0,near=0,bad=0,miss=0;const wrong=[];
+out.forEach((r,i)=>{const s=spans[i];s.className="w";if(!T[i])return;if(!r){s.classList.add("miss");miss++;wrong.push(T[i]);s.dataset.h=""}else if(r.s>=.999){s.classList.add("ok");ok++}else if(r.s>=.6){s.classList.add("near");near++;wrong.push(T[i]);s.dataset.h=r.h}else{s.classList.add("bad");bad++;wrong.push(T[i]);s.dataset.h=r.h}});
+const N=T.filter(Boolean).length,acc=Math.round((ok+near*.5)/N*100),wpm=secs>4?Math.round(S.length/(secs/60)):null,err=near+bad+miss;
+$("#s1").textContent=acc+"%";$("#s2").textContent=wpm??"–";$("#s3").textContent=err;$("#s4").textContent=ins.length;$("#res").hidden=false;
+$("#note").textContent="Repère de lecture à voix haute : environ 110 à 160 mots/min. La reconnaissance vocale corrige souvent vos erreurs vers le mot le plus probable : un score élevé prouve que vous êtes compris, pas que votre accent est exact.";
+save({d:new Date().toLocaleDateString("fr-FR"),t:curT,a:acc,w:wpm,e:err,m:wrong});$("#res").scrollIntoView({behavior:"smooth"})}
+/* Micro */
+function start(){if(!SR){$("#msg").textContent="Reconnaissance vocale non disponible ici (Chrome ou Safari récents recommandés). Utilisez la saisie manuelle ci-dessous.";$("details").open=true;return}
+try{speechSynthesis.cancel()}catch(_){}fin="";let audio=false;rec=new SR();rec.lang=$("#acc").value;rec.continuous=true;rec.interimResults=true;rec.onaudiostart=()=>{audio=true;$("#msg").textContent="Micro actif. Lisez le texte, puis touchez Arrêter."};
+rec.onresult=e=>{let it="";for(let k=e.resultIndex;k<e.results.length;k++){const r=e.results[k];if(r.isFinal)fin+=r[0].transcript+" ";else it+=r[0].transcript}$("#live").textContent=fin+it};
+rec.onerror=e=>{const m={"not-allowed":"Micro refusé. Autorisez-le dans les réglages du navigateur. Si la page est dans un cadre intégré, ouvrez-la dans un onglet complet.","service-not-allowed":"Micro bloqué par le navigateur ou le cadre qui contient la page.","no-speech":"Aucune voix entendue.","network":"Erreur réseau : la reconnaissance vocale du navigateur est en ligne."};if(e.error!=="aborted"){$("#msg").textContent=m[e.error]||"Erreur micro : "+e.error;if(e.error==="not-allowed"||e.error==="service-not-allowed"){on=false;ui()}}};
+rec.onend=()=>{if(on){try{rec.start()}catch(_){}}};
+try{rec.start();on=true;t0=Date.now();$("#msg").textContent="Démarrage du micro…";ui();setTimeout(()=>{if(on&&!audio&&!$("#live").textContent)$("#msg").textContent="Le micro ne s’ouvre pas. Page dans un cadre intégré : "+(window.top!==window.self?"oui. Cause probable : le cadre bloque le micro, ouvrez la page dans un onglet complet de Chrome.":"non. Vérifiez que le navigateur est Chrome et que le site a le droit d’utiliser le micro.")},4000)}catch(e){$("#msg").textContent="Impossible de démarrer le micro."}}
+function stop(){on=false;ui();const secs=(Date.now()-t0)/1000;try{rec.stop()}catch(_){}setTimeout(()=>{const t=($("#live").textContent||fin).trim();analyze(t,secs)},700)}
+function ui(){const b=$("#rb");b.textContent=on?"■ Arrêter":"● Lire à voix haute";b.className=on?"rec":"p"}
+/* Historique */
+function get(){try{return JSON.parse(localStorage.getItem("rp_h")||"[]")}catch(_){return[]}}
+function save(r){try{const h=get();h.unshift(r);localStorage.setItem("rp_h",JSON.stringify(h.slice(0,60)))}catch(_){}showH()}
+function showH(){const h=get(),b=$("#hist");b.textContent="";h.slice(0,15).forEach(r=>{const tr=document.createElement("tr");[r.d,r.t,r.a+"%",r.w??"–",r.e].forEach(v=>{const td=document.createElement("td");td.textContent=v;tr.append(td)});b.append(tr)});const c={};h.forEach(r=>r.m.forEach(w=>c[w]=(c[w]||0)+1));const top=Object.entries(c).filter(e=>e[1]>1).sort((a,b)=>b[1]-a[1]).slice(0,8).map(e=>e[0]+" ×"+e[1]);$("#top").textContent=top.length?"Mots ratés à répétition : "+top.join(", "):h.length?"Pas encore de mot raté à répétition.":"Aucune séance enregistrée."}
+/* Mot */
+function info(w){const ipa=IPA[w],tips=RULES.filter(r=>r[0].test(w)).map(r=>r[1]);if(sylls(w)>=3)tips.push("Mot long : repérez la syllabe accentuée en écoutant le modèle ; les autres voyelles se réduisent souvent à /ə/.");return{ipa,tips}}
+function openW(i){const w=words[i];if(!w||!w.n)return;const {ipa,tips}=info(w.n),h=spans[i].dataset.h;$("#dw").textContent=w.raw.replace(/[.,;:!?]/g,"");$("#di").textContent=ipa?"/"+ipa+"/":"IPA non répertoriée";$("#dh").textContent=h!==undefined?(h?"Entendu : « "+h+" »":"Ce mot n’a pas été entendu."):"";const d=$("#dt");d.textContent="";(tips.length?tips:["Aucun piège repéré par les règles : écoutez le modèle et répétez."]).forEach(t=>{const p=document.createElement("p");p.className="msg";p.textContent="• "+t;d.append(p)});
+$("#d1").onclick=()=>say(w.raw.replace(/[.,;:!?]/g,""),1);$("#d2").onclick=()=>say(w.raw.replace(/[.,;:!?]/g,""),.5);$("#dlg").showModal()}
+/* Événements */
+$("#lv").onchange=$("#dom").onchange=fillPick;$("#pick").onchange=load;
+$("#hear").onclick=()=>hear(false);$("#shadow").onclick=()=>hear(true);
+$("#rb").onclick=()=>on?stop():start();
+$("#custom").onclick=()=>{$("#cbox").hidden=!$("#cbox").hidden};
+$("#cok").onclick=()=>{const v=$("#ctxt").value.trim();if(v){cur=v;curT="Texte perso";render()}};
+$("#mok").onclick=()=>{const v=$("#man").value.trim();if(v)analyze(v,0)};
+$("#txt").onclick=e=>{if(e.target.dataset.i!==undefined)openW(+e.target.dataset.i)};
+$("#dx").onclick=()=>$("#dlg").close();
+$("#clr").onclick=()=>{try{localStorage.removeItem("rp_h")}catch(_){}showH()};
+if("speechSynthesis" in window)speechSynthesis.onvoiceschanged=()=>{};
+fillPick();$("#pick").value=1;load();showH();
+</script></body></html>
